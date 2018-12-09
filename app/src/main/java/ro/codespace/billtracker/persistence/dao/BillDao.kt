@@ -13,7 +13,7 @@ interface BillDao {
     fun getBills(): Flowable<List<Bill>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun save(bill: Bill)
+    fun save(bill: Bill): Long
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(bill: Bill)

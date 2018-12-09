@@ -1,0 +1,68 @@
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath('io.swagger:swagger-codegen:2.3.1')
+        classpath 'com.android.tools.build:gradle:3.2.1'
+    }
+}
+
+plugins {
+    id "org.hidetake.swagger.generator" version "2.9.0"
+}
+
+def supportingFilesNeeded = "ApiException.java,ApiInvoker.java,JsonUtil.java,Pair.java," +
+        "ApiKeyAuth.java,Authentication.java,HttpBasicAuth.java," +
+        "DeleteRequest.java,GetRequest.java,PatchRequest.java,PostRequest.java,PutRequest.java"
+swaggerSources {
+    billTracker {
+        inputFile = file('src/swagger-files/api.yaml')
+        code {
+            language = 'android'
+            components = [
+                    'apis'  : '',
+                    'apiDocs' : 'false',
+                    'models': '',
+                    'modelDocs': 'false',
+                    'supportingFiles': supportingFilesNeeded
+            ]
+            additionalProperties = [
+                    'invokerPackage'         : 'ro.codespace.billtracker',
+                    'apiPackage'             : 'ro.codespace.billtracker.swagger.api',
+                    'modelPackage'           : 'ro.codespace.billtracker.swagger.model',
+            ]
+        }
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion rootProject.compileSdkVersion
+    defaultConfig {
+        minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
+    }
+    sourceSets.main.java.srcDir "${swaggerSources.billTracker.code.outputDir}/src/main/java"
+}
+
+dependencies {
+    implementation "io.swagger:swagger-annotations:1.5.17"
+    implementation "com.google.code.gson:gson:2.8.2"
+    implementation "org.apache.httpcomponents:httpcore:4.4.9"
+    implementation "org.apache.httpcomponents:httpmime:4.5.5"
+    implementation "com.android.volley:volley:1.1.1"
+    swaggerCodegen 'io.swagger:swagger-codegen-cli:2.3.1'
+}
+
+tasks.withType(JavaCompile) {
+    compileTask -> compileTask.dependsOn(swaggerSources.billTracker.code)
+}
+
+configurations {
+    all {
+        exclude module: 'httpclient'
+    }
+}

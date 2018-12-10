@@ -18,6 +18,7 @@ class Converters {
 fun BillDTO.toEntity(): Bill {
     return Bill(name, price, Currency.valueOf(currency.name), dayOfMonth).also {
         it.id = id
+        it.synced = true
     }
 }
 

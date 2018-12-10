@@ -6,23 +6,12 @@ import org.jetbrains.anko.doAsync
 import ro.codespace.billtracker.BillsTrackerApplication
 import ro.codespace.billtracker.persistence.entity.Bill
 import ro.codespace.billtracker.persistence.entity.enumeration.Currency
-import ro.codespace.billtracker.persistence.toDTO
-import ro.codespace.billtracker.persistence.toEntity
-import ro.codespace.billtracker.swagger.api.BillsApi
 
 object BillRepository {
 
     private val billDao = BillsTrackerApplication.database.billDao()
-    private val billApi = BillsApi()
 
     fun getBills(): Flowable<List<Bill>> {
-
-        doAsync {
-            billApi.bills.forEach {
-                billDao.save(it.toEntity())
-            }
-        }
-
         return billDao.getBills()
     }
 
@@ -30,23 +19,25 @@ object BillRepository {
 
     fun create(name: String, price: Float, currency: Currency, paymentDay: Int) {
         doAsync {
-            val bill = Bill(name, price, currency, paymentDay)
-            bill.id = billDao.save(bill).toInt()
-            billApi.saveBill(bill.toDTO())
+            billDao.save(Bill(name, price, currency, paymentDay))
         }
     }
 
-    fun update(bill: Bill) {
+    fun update(bill: Bill, sync: Boolean = true) {
         doAsync {
-            billDao.update(bill)
-                billApi.updateBill(bill.id, bill.toDTO())
+            billDao.update(bill.apply {
+                synced = !sync
+            })
         }
     }
 
     fun delete(bill: Bill) {
+        update(bill.apply { deleted = true }, false)
+    }
+
+    fun insertOrUpdate(bill: Bill) {
         doAsync {
-            billApi.deleteBill(bill.id)
-            billDao.delete(bill)
+            billDao.save(bill)
         }
     }
 }

@@ -12,4 +12,6 @@ data class Bill(
     var paymentDay: Int
 ) {
     @PrimaryKey(autoGenerate = true) var id: Int? = null
+    var synced = false
+    var deleted = false
 }

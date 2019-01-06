@@ -1,8 +1,6 @@
 package ro.codespace.billtracker.ui.fragment
 
-import android.content.res.Resources
-import android.graphics.Color
-import android.graphics.drawable.Icon
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.DividerItemDecoration
@@ -19,13 +17,19 @@ import ro.codespace.billtracker.R
 import ro.codespace.billtracker.persistence.entity.Bill
 import ro.codespace.billtracker.persistence.repository.BillRepository
 import ro.codespace.billtracker.ui.ReactiveAdapter
+import ro.codespace.billtracker.ui.viewmodel.BillsViewModel
+import ro.codespace.billtracker.utils.replace
 
 
 class BillsFragment : Fragment() {
 
     private val disposables = CompositeDisposable()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_bills, container, false)!!
+    private val viewModel: BillsViewModel by lazy { ViewModelProviders.of(activity!!)[BillsViewModel::class.java] }
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return inflater.inflate(R.layout.fragment_bills, container, false)!!
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -52,21 +56,14 @@ class BillsFragment : Fragment() {
 
     private fun setupBillClickListener(itemView: View, bill: Bill) {
         RxView.clicks(itemView).subscribe {
-            val editBillFragment = EditBillFragment()
-            editBillFragment.arguments = Bundle().apply {
-                putInt("billId", bill.id!!)
-            }
-            activity!!.supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, editBillFragment)
-                .addToBackStack(null).commit()
+            viewModel.selectedBill = bill
+            activity!!.supportFragmentManager.replace(R.id.content_frame, EditBillFragment(), addToBackStack = true)
         }.addTo(disposables)
     }
 
     private fun initCreateBillButton() {
         RxView.clicks(bills_fab).subscribe {
-            activity!!.supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, CreateBillFragment())
-                .addToBackStack(null).commit()
+            activity!!.supportFragmentManager.replace(R.id.content_frame, CreateBillFragment(), addToBackStack = true)
         }.addTo(disposables)
     }
 

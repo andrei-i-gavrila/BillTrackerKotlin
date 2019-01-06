@@ -1,27 +1,21 @@
 package ro.codespace.billtracker.ui.fragment
 
+import android.arch.lifecycle.ViewModelProviders
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
-import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.subjects.SingleSubject
 import kotlinx.android.synthetic.main.fragment_add_bill.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.uiThread
 import ro.codespace.billtracker.R
-import ro.codespace.billtracker.persistence.repository.BillRepository
+import ro.codespace.billtracker.ui.viewmodel.BillsViewModel
 
 abstract class BaseBillFragment : Fragment() {
 
-    protected val disposables = CompositeDisposable()
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?) = inflater.inflate(R.layout.fragment_add_bill, container, false)!!
-
-    override fun onDestroy() {
-        super.onDestroy()
-        disposables.dispose()
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        setHasOptionsMenu(true)
+        return inflater.inflate(R.layout.fragment_add_bill, container, false)
     }
 
     fun validateBillInput(): Boolean {

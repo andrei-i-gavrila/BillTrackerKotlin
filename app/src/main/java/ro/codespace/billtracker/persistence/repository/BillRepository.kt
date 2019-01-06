@@ -1,43 +1,59 @@
 package ro.codespace.billtracker.persistence.repository
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import org.jetbrains.anko.doAsync
-import ro.codespace.billtracker.BillsTrackerApplication
+import io.reactivex.subjects.PublishSubject
 import ro.codespace.billtracker.persistence.entity.Bill
-import ro.codespace.billtracker.persistence.entity.enumeration.Currency
+import ro.codespace.billtracker.persistence.entity.Currency
 
 object BillRepository {
 
-    private val billDao = BillsTrackerApplication.database.billDao()
-
     fun getBills(): Flowable<List<Bill>> {
-        return billDao.getBills()
+        val bills = PublishSubject.create<List<Bill>>()
+        FirebaseFirestore.getInstance()
+            .collection("bills")
+            .whereEqualTo("userId", FirebaseAuth.getInstance().currentUser?.uid)
+            .addSnapshotListener { snapshot, _ ->
+                snapshot?.map {
+                    it.toObject(Bill::class.java).apply {
+                        id = it.id
+                    }
+                }?.let {
+                    bills.onNext(it)
+                }
+            }
+        return bills.toFlowable(BackpressureStrategy.LATEST)
     }
 
-    fun getBill(id: Int) = billDao.getById(id).subscribeOn(Schedulers.io())!!
+    fun getBill(billId: String): Observable<Bill> {
+        val result = PublishSubject.create<Bill>()
+
+        FirebaseFirestore.getInstance().collection("bills").document(billId)
+            .addSnapshotListener { snapshot, _ ->
+                snapshot?.toObject(Bill::class.java)?.let {
+                    it.id = snapshot.id
+                    result.onNext(it)
+                }
+            }
+
+        return result.subscribeOn(Schedulers.io())
+    }
 
     fun create(name: String, price: Float, currency: Currency, paymentDay: Int) {
-        doAsync {
-            billDao.save(Bill(name, price, currency, paymentDay))
-        }
+        FirebaseFirestore.getInstance().collection("bills")
+            .add(Bill(name, price, currency, paymentDay, FirebaseAuth.getInstance().uid!!))
     }
 
-    fun update(bill: Bill, sync: Boolean = true) {
-        doAsync {
-            billDao.update(bill.apply {
-                synced = !sync
-            })
-        }
+    fun update(bill: Bill) {
+        FirebaseFirestore.getInstance().collection("bills").document(bill.id!!).set(bill)
     }
 
     fun delete(bill: Bill) {
-        update(bill.apply { deleted = true }, false)
+        FirebaseFirestore.getInstance().collection("bills").document(bill.id!!).delete()
     }
 
-    fun insertOrUpdate(bill: Bill) {
-        doAsync {
-            billDao.save(bill)
-        }
-    }
 }

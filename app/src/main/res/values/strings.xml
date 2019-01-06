@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Bill Tracker</string>
+    <string name="app_name">Bills Tracker</string>
     <string name="see_bills">See all bills</string>
     <string name="what_do_i_pay">What do I need to pay?</string>
     <string name="bills_title">Bills</string>
@@ -15,4 +15,12 @@
     <string name="invalid_integer">Invalid integer value</string>
     <string name="invalid_payment_day">Value should be between 0 and 30</string>
     <string name="delete">Delete</string>
+    <string name="log_in_message">You need to be logged in to use the app</string>
+    <string name="log_in">Log in</string>
+    <string name="not_logged_in_title">Log in</string>
+    <string name="header_guest_title">Guest</string>
+    <string name="log_out">Log out</string>
+    <string name="action_save">Save</string>
+    <string name="action_close">Close</string>
+    <string name="action_delete">Delete</string>
 </resources>

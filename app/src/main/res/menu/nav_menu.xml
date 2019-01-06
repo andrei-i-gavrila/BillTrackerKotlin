@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+                android:id="@+id/nav_bills_list"
+                android:icon="@drawable/ic_list_black"
+                android:title="@string/bills_title" />
+
+        <item
+                android:id="@+id/nav_bills_add"
+                android:icon="@drawable/ic_add_black_24dp"
+                android:title="@string/add_bill_title" />
+
+
+        <item
+                android:id="@+id/nav_log_in"
+                android:icon="@drawable/ic_account_circle_black"
+                android:title="@string/log_in" />
+
+
+        <item
+                android:id="@+id/nav_log_out"
+                android:icon="@drawable/ic_log_out_black"
+                android:title="@string/log_out" />
+
+
+    </group>
+</menu>
